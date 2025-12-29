@@ -52,6 +52,19 @@ const citas = pgTable("citas", {
     creadoEn: timestamp("creado_en").defaultNow(),
 });
 
+// Resultados de Laboratorio
+const resultadosLaboratorio = pgTable("resultados_laboratorio", {
+    id: serial("id").primaryKey(),
+    pacienteId: varchar("paciente_id").references(() => usuarios.id).notNull(),
+    medicoId: integer("medico_id").references(() => medicos.id), // Opccional, si un médico lo solicitó
+    citaId: integer("cita_id").references(() => citas.id), // Opcional, vinculado a una cita
+    nombreArchivo: text("nombre_archivo").notNull(),
+    urlArchivo: text("url_archivo").notNull(),
+    tipo: text("tipo").notNull(), // PDF, IMAGEN, ETC
+    descripcion: text("descripcion"),
+    subidoEn: timestamp("subido_en").defaultNow(),
+});
+
 module.exports = {
     roleEnum,
     appointmentStatusEnum,
@@ -60,4 +73,5 @@ module.exports = {
     medicos,
     disponibilidad,
     citas,
+    resultadosLaboratorio,
 };

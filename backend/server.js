@@ -25,12 +25,16 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const labRoutes = require('./routes/labRoutes');
+const path = require('path');
 
 // Mount Routes
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/lab', labRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');

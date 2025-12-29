@@ -52,6 +52,7 @@ export default function Layout() {
                                     <div className="pt-4 pb-2 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Paciente</div>
                                     <NavLink to="/book-appointment">Reservar Cita</NavLink>
                                     <NavLink to="/appointments">Mis Citas</NavLink>
+                                    <NavLink to="/results">Resultados</NavLink>
                                 </>
                             )}
 
@@ -60,6 +61,7 @@ export default function Layout() {
                                 <>
                                     <div className="pt-4 pb-2 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Médico</div>
                                     <NavLink to="/appointments">Mis Citas</NavLink>
+                                    <NavLink to="/results">Ver Resultados</NavLink>
                                 </>
                             )}
 

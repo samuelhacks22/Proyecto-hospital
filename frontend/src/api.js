@@ -38,5 +38,10 @@ export const userService = {
     delete: (id) => api.delete(`/users/${id}`),
 };
 
+export const labService = {
+    upload: (formData) => api.post('/lab/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    getResults: () => api.get('/lab'),
+};
+
 export default api;
 
