@@ -47,3 +47,36 @@ exports.updateProfile = async (req, res) => {
         res.status(500).json({ message: 'Error del servidor' });
     }
 };
+// [ADMIN] Get All Users
+exports.getAllUsers = async (req, res) => {
+    try {
+        const allUsers = await db.select().from(usuarios);
+        // Exclude passwords
+        const safeUsers = allUsers.map(u => {
+            const { contrasena, ...rest } = u;
+            return rest;
+        });
+        res.json(safeUsers);
+    } catch (error) {
+        console.error('Get All Users Error:', error);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
+};
+
+// [ADMIN] Delete User
+exports.deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Optional: Add logic to cascade delete or prevent deletion if they have appointments
+        // For now, we rely on DB cascade or manual cleanup. 
+        // NOTE: Our Seed script used CASCADE in cleaning, but schema might not have it defined.
+        // Let's assume basic deletion for now.
+
+        await db.delete(usuarios).where(eq(usuarios.id, id));
+        res.json({ message: 'Usuario eliminado correctamente' });
+    } catch (error) {
+        console.error('Delete User Error:', error);
+        res.status(500).json({ message: 'Error al eliminar usuario (posiblemente tenga datos relacionados)' });
+    }
+};

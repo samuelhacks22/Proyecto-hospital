@@ -33,6 +33,9 @@ export const doctorService = {
 export const userService = {
     getProfile: () => api.get('/users/profile'),
     updateProfile: (data) => api.put('/users/profile', data),
+    // Admin only
+    getAll: () => api.get('/users'),
+    delete: (id) => api.delete(`/users/${id}`),
 };
 
 export default api;

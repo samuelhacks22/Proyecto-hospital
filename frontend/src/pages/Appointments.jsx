@@ -1,10 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { appointmentService } from '../api';
 
 export default function Appointments() {
-    const { user } = useAuth();
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -13,7 +11,7 @@ export default function Appointments() {
             try {
                 const res = await appointmentService.getAll();
                 // Sort by date descending
-                setAppointments(res.data.sort((a, b) => new Date(`${b.fecha}T${b.horaInicio}`) - new Date(`${a.fecha}T${a.horaInicio}`)));
+                setAppointments(res.data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
             } catch (error) {
                 console.error('Error fetching appointments:', error);
             } finally {
@@ -24,54 +22,69 @@ export default function Appointments() {
         fetchAppointments();
     }, []);
 
-    if (loading) return <div className="p-4">Cargando citas...</div>;
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'CONFIRMADA': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            case 'PENDIENTE': return 'bg-amber-100 text-amber-800 border-amber-200';
+            case 'CANCELADA': return 'bg-rose-100 text-rose-800 border-rose-200';
+            case 'COMPLETADA': return 'bg-slate-100 text-slate-800 border-slate-200';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    if (loading) return <div className="p-4 text-center text-slate-500">Cargando citas...</div>;
 
     return (
-        <div className="px-4 py-6 sm:px-0">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-6">Mis Citas</h1>
+        <div className="max-w-5xl mx-auto">
+            <h1 className="text-2xl font-bold text-slate-900 mb-6">Mis Citas</h1>
 
             {appointments.length === 0 ? (
-                <div className="bg-white shadow rounded-lg p-6 text-center text-gray-500">
-                    No tienes citas registradas.
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 mb-4">
+                        <svg className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-slate-900">No tienes citas registradas</h3>
+                    <p className="mt-1 text-slate-500">Cuando reserves una cita, aparecerá aquí.</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
-                    {appointments.map(app => (
-                        <div key={app.id} className="bg-white shadow overflow-hidden sm:rounded-lg">
-                            <div className="px-4 py-4 sm:px-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="text-sm font-medium text-indigo-600 truncate">
-                                        {new Date(app.fecha).toLocaleDateString()} - {app.horaInicio}
+                <div className="space-y-4">
+                    {appointments.map((app) => (
+                        <div key={app.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0">
+                                        <div className="h-12 w-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold border border-brand-100">
+                                            {new Date(app.fecha).getDate()}
+                                        </div>
                                     </div>
-                                    <div className="ml-2 flex-shrink-0 flex">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${app.estado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-800' :
-                                            app.estado === 'CONFIRMADA' ? 'bg-green-100 text-green-800' :
-                                                'bg-red-100 text-red-800'
-                                            }`}>
-                                            {app.estado}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="mt-2 sm:flex sm:justify-between">
-                                    <div className="sm:flex">
-                                        <p className="flex items-center text-sm text-gray-500">
-                                            {user.rol === 'PACIENTE'
-                                                ? `Doctor: ${app.nombreMedico || 'No asignado'} (${app.especialidad || 'General'})`
-                                                : `Paciente: ${app.nombrePaciente || 'Desconocido'}`
-                                            }
+                                    <div>
+                                        <h3 className="font-bold text-slate-900">
+                                            {app.nombreMedico ? `Dr. ${app.nombreMedico}` : app.nombrePaciente}
+                                        </h3>
+                                        <p className="text-sm text-slate-500">
+                                            {new Date(app.fecha).toLocaleDateString()} a las {app.horaInicio.slice(0, 5)}
                                         </p>
-                                    </div>
-                                    <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                        <p>{app.tipo}</p>
+                                        <p className="text-sm text-slate-500 mt-1 capitalize">{app.tipo.toLowerCase()}</p>
                                     </div>
                                 </div>
-                                {app.enlaceReunion && (
-                                    <div className="mt-2 text-sm">
-                                        <a href={app.enlaceReunion} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                                            Unirse a la reunión &rarr;
+
+                                <div className="flex flex-col items-end gap-3">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(app.estado)}`}>
+                                        {app.estado}
+                                    </span>
+
+                                    {app.enlaceReunion && app.estado !== 'CANCELADA' && (
+                                        <a
+                                            href={app.enlaceReunion}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-700"
+                                        >
+                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                            Unirse a la reunión
                                         </a>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}
