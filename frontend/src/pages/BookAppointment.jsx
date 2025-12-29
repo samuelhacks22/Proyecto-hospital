@@ -2,9 +2,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doctorService, appointmentService } from '../api';
+import TriageStep from '../components/TriageStep';
 
 export default function BookAppointment() {
     const navigate = useNavigate();
+
+    // Triage State
+    const [triageComplete, setTriageComplete] = useState(false);
+    const [recommendedType, setRecommendedType] = useState(null); // 'VIRTUAL' or 'PRESENCIAL'
+
     const [doctors, setDoctors] = useState([]);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [availability, setAvailability] = useState([]);
@@ -28,6 +34,11 @@ export default function BookAppointment() {
         fetchDoctors();
     }, []);
 
+    const handleTriageComplete = (type) => {
+        setRecommendedType(type);
+        setTriageComplete(true);
+    };
+
     const handleSelectDoctor = async (doctor) => {
         setSelectedDoctor(doctor);
         setAvailability([]);
@@ -49,7 +60,8 @@ export default function BookAppointment() {
                 medicoId: selectedDoctor.id,
                 fecha: selectedDate,
                 horaInicio: selectedTime,
-                notas
+                notas,
+                tipo: recommendedType || 'VIRTUAL' // Use the recommendation
             });
             alert('¡Cita reservada con éxito!');
             navigate('/dashboard');
@@ -72,6 +84,15 @@ export default function BookAppointment() {
         return dates;
     };
 
+    // Render Triage Step first
+    if (!triageComplete) {
+        return (
+            <div className="max-w-4xl mx-auto py-8">
+                <TriageStep onComplete={handleTriageComplete} />
+            </div>
+        );
+    }
+
     if (loading) return (
         <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
@@ -79,10 +100,14 @@ export default function BookAppointment() {
     );
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-slate-900">Reservar una Cita</h1>
-                <p className="mt-2 text-slate-600">Encuentra al especialista adecuado y agenda tu consulta en minutos.</p>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-2 ${recommendedType === 'VIRTUAL' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+                    }`}>
+                    Recomendación: Cita {recommendedType}
+                </span>
+                <h1 className="text-3xl font-bold text-slate-900">Selecciona tu Médico</h1>
+                <p className="mt-2 text-slate-600">Hemos filtrado las mejores opciones según tu evaluación.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -114,12 +139,6 @@ export default function BookAppointment() {
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>
                                 {doctor.precioConsulta ? `$${doctor.precioConsulta}` : 'Consultar precio'}
                             </div>
-                            {doctor.verificado && (
-                                <div className="flex items-center text-accent-600">
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    Verificado
-                                </div>
-                            )}
                         </div>
                     </div>
                 ))}
@@ -128,11 +147,11 @@ export default function BookAppointment() {
             {selectedDoctor && (
                 <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden animate-fade-in-up">
                     <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                        <h2 className="text-lg font-semibold text-slate-800">Horarios Disponibles para {selectedDoctor.nombreCompleto}</h2>
+                        <h2 className="text-lg font-semibold text-slate-800">Horarios Disponibles - {recommendedType}</h2>
                     </div>
                     <div className="p-6">
                         {availability.length === 0 ? (
-                            <p className="text-slate-500 text-center py-4">No hay horarios disponibles configurados para este médico.</p>
+                            <p className="text-slate-500 text-center py-4">No hay horarios disponibles.</p>
                         ) : (
                             <div className="space-y-6">
                                 {availability.map(slot => (
@@ -149,11 +168,11 @@ export default function BookAppointment() {
                                                     key={date}
                                                     onClick={() => {
                                                         setSelectedDate(date);
-                                                        setSelectedTime(slot.horaInicio); // Simplifying to start time for MVP
+                                                        setSelectedTime(slot.horaInicio);
                                                     }}
                                                     className={`px-4 py-2 text-sm rounded-lg border font-medium transition-all duration-200 ${selectedDate === date && selectedTime === slot.horaInicio
-                                                            ? 'bg-brand-600 text-white border-brand-600 shadow-md transform scale-105'
-                                                            : 'bg-white text-slate-700 border-slate-200 hover:border-brand-300 hover:bg-brand-50'
+                                                            ? 'bg-brand-600 text-white border-brand-600'
+                                                            : 'bg-white text-slate-700 border-slate-200 hover:bg-brand-50'
                                                         }`}
                                                 >
                                                     {new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
@@ -167,20 +186,18 @@ export default function BookAppointment() {
 
                         {selectedDate && (
                             <div className="mt-8 pt-6 border-t border-slate-100">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Notas adicionales (opcional)</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Notas adicionales</label>
                                 <textarea
-                                    className="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                                    className="w-full rounded-lg border-slate-300 shadow-sm"
                                     rows="3"
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Describe brevemente el motivo de tu consulta..."
                                 ></textarea>
                                 <div className="mt-4 flex justify-end">
                                     <button
                                         onClick={handleBook}
                                         disabled={booking}
-                                        className={`px-6 py-3 rounded-lg text-white font-bold shadow-lg shadow-brand-500/30 transition-all ${booking ? 'bg-slate-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700 hover:-translate-y-0.5'
-                                            }`}
+                                        className="px-6 py-3 bg-brand-600 text-white rounded-lg font-bold shadow-lg hover:bg-brand-700"
                                     >
                                         {booking ? 'Procesando...' : 'Confirmar Reserva'}
                                     </button>
