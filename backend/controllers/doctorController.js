@@ -13,13 +13,13 @@ exports.getMyProfile = async (req, res) => {
         const doctorProfile = doctorResult[0];
 
         if (!doctorProfile) {
-            return res.status(404).json({ message: 'Doctor profile not found' });
+            return res.status(404).json({ message: 'Perfil de médico no encontrado' });
         }
 
         res.json(doctorProfile);
     } catch (error) {
         console.error('Get Doctor Profile Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
@@ -53,7 +53,7 @@ exports.updateProfile = async (req, res) => {
         res.json(updatedResult[0]);
     } catch (error) {
         console.error('Update Doctor Profile Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
@@ -65,14 +65,14 @@ exports.getAvailability = async (req, res) => {
         const doctor = doctorResult[0];
 
         if (!doctor) {
-            return res.status(404).json({ message: 'Doctor profile not found' });
+            return res.status(404).json({ message: 'Perfil de médico no encontrado' });
         }
 
         const schedule = await db.select().from(availability).where(eq(availability.doctorId, doctor.id));
         res.json(schedule);
     } catch (error) {
         console.error('Get Availability Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
@@ -86,7 +86,7 @@ exports.setAvailability = async (req, res) => {
         const doctor = doctorResult[0];
 
         if (!doctor) {
-            return res.status(404).json({ message: 'Doctor profile not found' });
+            return res.status(404).json({ message: 'Perfil de médico no encontrado' });
         }
 
         // 2. Clear existing availability
@@ -104,10 +104,10 @@ exports.setAvailability = async (req, res) => {
             await db.insert(availability).values(newSlots);
         }
 
-        res.json({ message: 'Availability updated', schedule });
+        res.json({ message: 'Disponibilidad actualizada', schedule });
     } catch (error) {
         console.error('Set Availability Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
@@ -128,6 +128,6 @@ exports.getAllDoctors = async (req, res) => {
         res.json(allDoctors);
     } catch (error) {
         console.error('Get All Doctors Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };

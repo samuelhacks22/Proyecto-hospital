@@ -11,13 +11,13 @@ exports.register = async (req, res) => {
         const { email, password, fullName, phone, role } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+            return res.status(400).json({ message: 'El correo y la contraseña son obligatorios' });
         }
 
         // Check if user exists
         const existingUser = await db.select().from(users).where(eq(users.email, email));
         if (existingUser.length > 0) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ message: 'El usuario ya existe' });
         }
 
         // Hash password
@@ -40,13 +40,13 @@ exports.register = async (req, res) => {
             passwordHash,
             fullName,
             phone,
-            role: role || 'PATIENT'
+            role: role || 'PACIENTE'
         });
 
-        res.status(201).json({ message: 'User registered successfully' });
+        res.status(201).json({ message: 'Usuario registrado exitosamente' });
     } catch (error) {
         console.error('Register error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
@@ -59,13 +59,13 @@ exports.login = async (req, res) => {
         const user = userResult[0];
 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Credenciales inválidas' });
         }
 
         // Check password
         const isMatch = await bcrypt.compare(password, user.passwordHash);
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Credenciales inválidas' });
         }
 
         // Generate Token

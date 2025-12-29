@@ -10,7 +10,7 @@ exports.getProfile = async (req, res) => {
         const user = userResult[0];
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
         // Exclude passwordHash
@@ -18,7 +18,7 @@ exports.getProfile = async (req, res) => {
         res.json(userProfile);
     } catch (error) {
         console.error('Get Profile Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
@@ -44,6 +44,6 @@ exports.updateProfile = async (req, res) => {
         res.json(userProfile);
     } catch (error) {
         console.error('Update Profile Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };

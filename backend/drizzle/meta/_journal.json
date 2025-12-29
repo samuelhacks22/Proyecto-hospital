@@ -8,6 +8,20 @@
       "when": 1767036412681,
       "tag": "0000_clever_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1767038015843,
+      "tag": "0001_sour_sleepwalker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767038805652,
+      "tag": "0002_wise_doctor_spectrum",
+      "breakpoints": true
     }
   ]
 }

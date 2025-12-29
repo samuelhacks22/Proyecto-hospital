@@ -1,65 +1,63 @@
 const { pgTable, serial, text, timestamp, boolean, pgEnum, integer, date, time, varchar } = require("drizzle-orm/pg-core");
 
-// Enums
-const roleEnum = pgEnum("role", ["PATIENT", "DOCTOR", "CLINIC", "ADMIN"]);
-const appointmentStatusEnum = pgEnum("appointment_status", ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]);
-const appointmentTypeEnum = pgEnum("appointment_type", ["VIRTUAL", "IN_PERSON"]);
+// Enums (Spanish) - Already done
+const roleEnum = pgEnum("rol", ["PACIENTE", "MEDICO", "CLINICA", "ADMIN"]);
+const appointmentStatusEnum = pgEnum("estado_cita", ["PENDIENTE", "CONFIRMADA", "CANCELADA", "COMPLETADA"]);
+const appointmentTypeEnum = pgEnum("tipo_cita", ["VIRTUAL", "PRESENCIAL"]);
 
-// Users (Adapted to existing schema + new fields)
-const users = pgTable("users", {
-    id: varchar("id").primaryKey().notNull(), // Existing UUID
+// Usuarios
+const usuarios = pgTable("usuarios", {
+    id: varchar("id").primaryKey().notNull(), // UUID
     email: text("email").notNull(),
-    passwordHash: text("password_hash").notNull(), // Existing
-    displayName: text("display_name"), // Existing
-    // New fields
-    fullName: text("full_name"),
-    phone: text("phone"),
+    contrasena: text("contrasena").notNull(), // password_hash
+    nombreCompleto: text("nombre_completo"), // full_name
+    telefono: text("telefono"),
     cedula: text("cedula"),
-    role: roleEnum("role").default("PATIENT"),
-    createdAt: timestamp("created_at").defaultNow(),
-    // Ignoring other existing fields like 'rank' for now, or we can map 'role' to it later.
+    fotoUrl: text("foto_url"),
+    rol: roleEnum("rol").default("PACIENTE"),
+    creadoEn: timestamp("creado_en").defaultNow(),
 });
 
-// Doctors (Profile)
-const doctors = pgTable("doctors", {
+// Medicos
+const medicos = pgTable("medicos", {
     id: serial("id").primaryKey(),
-    userId: varchar("user_id").references(() => users.id).notNull().unique(), // FK to UUID
-    specialty: text("specialty").notNull(),
-    licenseNumber: text("license_number"),
-    bio: text("bio"),
-    consultationFee: integer("consultation_fee"),
-    isVerified: boolean("is_verified").default(false),
+    usuarioId: varchar("usuario_id").references(() => usuarios.id).notNull().unique(),
+    especialidad: text("especialidad").notNull(),
+    numeroLicencia: text("numero_licencia"),
+    biografia: text("biografia"),
+    precioConsulta: integer("precio_consulta"),
+    verificado: boolean("verificado").default(false),
 });
 
-// Availability
-const availability = pgTable("availability", {
+// Disponibilidad
+const disponibilidad = pgTable("disponibilidad", {
     id: serial("id").primaryKey(),
-    doctorId: integer("doctor_id").references(() => doctors.id).notNull(),
-    dayOfWeek: integer("day_of_week").notNull(),
-    startTime: time("start_time").notNull(),
-    endTime: time("end_time").notNull(),
+    medicoId: integer("medico_id").references(() => medicos.id).notNull(),
+    diaSemana: integer("dia_semana").notNull(), // 0-6
+    horaInicio: time("hora_inicio").notNull(),
+    horaFin: time("hora_fin").notNull(),
 });
 
-// Appointments
-const appointments = pgTable("appointments", {
+// Citas
+const citas = pgTable("citas", {
     id: serial("id").primaryKey(),
-    patientId: varchar("patient_id").references(() => users.id).notNull(), // FK to UUID
-    doctorId: integer("doctor_id").references(() => doctors.id).notNull(),
-    date: date("date").notNull(),
-    startTime: time("start_time").notNull(),
-    status: appointmentStatusEnum("status").default("PENDING").notNull(),
-    type: appointmentTypeEnum("type").default("VIRTUAL").notNull(),
-    meetingLink: text("meeting_link"),
-    notes: text("notes"),
-    createdAt: timestamp("created_at").defaultNow(),
+    pacienteId: varchar("paciente_id").references(() => usuarios.id).notNull(),
+    medicoId: integer("medico_id").references(() => medicos.id).notNull(),
+    fecha: date("fecha").notNull(),
+    horaInicio: time("hora_inicio").notNull(),
+    estado: appointmentStatusEnum("estado").default("PENDIENTE").notNull(),
+    tipo: appointmentTypeEnum("tipo").default("VIRTUAL").notNull(),
+    enlaceReunion: text("enlace_reunion"),
+    notas: text("notas"),
+    creadoEn: timestamp("creado_en").defaultNow(),
 });
 
 module.exports = {
     roleEnum,
     appointmentStatusEnum,
     appointmentTypeEnum,
-    users,
-    doctors,
-    availability,
-    appointments,
+    usuarios,
+    medicos,
+    disponibilidad,
+    citas,
 };
