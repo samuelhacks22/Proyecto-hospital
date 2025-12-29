@@ -4,7 +4,7 @@ const path = require('path');
 
 async function run() {
     console.log('Loading .env file...');
-    const result = require('dotenv').config({ path: path.join(__dirname, '.env') });
+    const result = require('dotenv').config({ path: path.join(__dirname, '.env'), override: true });
     if (result.error) {
         console.error('Error loading .env:', result.error);
     }

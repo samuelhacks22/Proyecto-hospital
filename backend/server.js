@@ -17,9 +17,17 @@ const pool = new Pool({
 });
 const db = drizzle(pool);
 
-// Routes
+// Export db for controllers
+module.exports = { db };
+
+// Routes imports
+const authRoutes = require('./routes/authRoutes');
+
+// Mount Routes
+app.use('/api/auth', authRoutes);
+
 app.get('/', (req, res) => {
-  res.send('Plataforma Médica API Running');
+  res.send('API is running...');
 });
 
 app.get('/health', async (req, res) => {
