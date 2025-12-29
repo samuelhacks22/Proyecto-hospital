@@ -3,11 +3,13 @@ const router = express.Router();
 const doctorController = require('../controllers/doctorController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Protected (Doctor only ideally)
-router.get('/me', authMiddleware, doctorController.getMyProfile);
-router.put('/profile', authMiddleware, doctorController.updateProfile);
-router.get('/availability', authMiddleware, doctorController.getAvailability);
-router.put('/availability', authMiddleware, doctorController.setAvailability);
+const checkRole = require('../middleware/roleMiddleware');
+
+// Protected (Doctor only ideally, maybe Admin too)
+router.get('/me', authMiddleware, checkRole(['MEDICO', 'ADMIN']), doctorController.getMyProfile);
+router.put('/profile', authMiddleware, checkRole(['MEDICO', 'ADMIN']), doctorController.updateProfile);
+router.get('/availability', authMiddleware, checkRole(['MEDICO', 'ADMIN']), doctorController.getAvailability);
+router.put('/availability', authMiddleware, checkRole(['MEDICO', 'ADMIN']), doctorController.setAvailability);
 
 // Public (for Patients to find doctors)
 router.get('/', doctorController.getAllDoctors);

@@ -7,6 +7,9 @@ import Layout from './components/Layout';
 import BookAppointment from './pages/BookAppointment';
 import Appointments from './pages/Appointments';
 import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
+import ClinicDashboard from './pages/ClinicDashboard';
+
 
 
 
@@ -16,6 +19,14 @@ const ProtectedRoute = ({ children }) => {
   if (!user) return <Navigate to="/login" />;
   return children;
 };
+
+const RoleRoute = ({ children, allowedRoles }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div>Cargando...</div>;
+  if (!user || !allowedRoles.includes(user.rol)) return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
 
 function AppRoutes() {
   return (
@@ -32,9 +43,33 @@ function AppRoutes() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="book-appointment" element={<BookAppointment />} />
+
+        {/* Patient Only */}
+        <Route path="book-appointment" element={
+          <RoleRoute allowedRoles={['PACIENTE']}>
+            <BookAppointment />
+          </RoleRoute>
+        } />
+
+        {/* Shared (Patient/Doctor) */}
         <Route path="appointments" element={<Appointments />} />
+
+        {/* Admin Only */}
+        <Route path="admin" element={
+          <RoleRoute allowedRoles={['ADMIN']}>
+            <AdminDashboard />
+          </RoleRoute>
+        } />
+
+        {/* Clinic Only */}
+        <Route path="clinic" element={
+          <RoleRoute allowedRoles={['CLINICA']}>
+            <ClinicDashboard />
+          </RoleRoute>
+        } />
+
         <Route path="profile" element={<Profile />} />
+
 
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />

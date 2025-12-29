@@ -31,18 +31,33 @@ export default function Layout() {
                                     >
                                         Inicio
                                     </Link>
-                                    <Link
-                                        to="/book-appointment"
-                                        className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/book-appointment') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-                                    >
-                                        Reservar Cita
-                                    </Link>
-                                    <Link
-                                        to="/appointments"
-                                        className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/appointments') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-                                    >
-                                        Mis Citas
-                                    </Link>
+
+                                    {/* Patient Links */}
+                                    {user?.rol === 'PACIENTE' && (
+                                        <>
+                                            <Link to="/book-appointment" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/book-appointment') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Reservar Cita</Link>
+                                            <Link to="/appointments" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/appointments') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Mis Citas</Link>
+                                        </>
+                                    )}
+
+                                    {/* Admin Links */}
+                                    {user?.rol === 'ADMIN' && (
+                                        <Link to="/admin" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/admin') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Administración</Link>
+                                    )}
+
+                                    {/* Clinic Links */}
+                                    {user?.rol === 'CLINICA' && (
+                                        <Link to="/clinic" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/clinic') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Mi Clínica</Link>
+                                    )}
+
+                                    {/* Doctor Links */}
+                                    {user?.rol === 'MEDICO' && (
+                                        <>
+                                            <Link to="/appointments" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/appointments') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Mis Citas</Link>
+                                            {/* Doctor Availability link could go here */}
+                                        </>
+                                    )}
+
                                     <Link
                                         to="/profile"
                                         className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/profile') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
