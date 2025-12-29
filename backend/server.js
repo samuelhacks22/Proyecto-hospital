@@ -1,8 +1,8 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
 const express = require('express');
 const cors = require('cors');
-const { neon } = require('@neondatabase/serverless');
-const { drizzle } = require('drizzle-orm/neon-http');
+const { drizzle } = require('drizzle-orm/node-postgres');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,8 +12,10 @@ app.use(cors());
 app.use(express.json());
 
 // Database Connection
-const sql = neon(process.env.DATABASE_URL);
-const db = drizzle(sql);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+const db = drizzle(pool);
 
 // Routes
 app.get('/', (req, res) => {
@@ -22,7 +24,7 @@ app.get('/', (req, res) => {
 
 app.get('/health', async (req, res) => {
   try {
-    const result = await sql`SELECT 1`;
+    const result = await db.execute('SELECT 1');
     res.json({ status: 'ok', db: 'connected', time: new Date().toISOString() });
   } catch (error) {
     console.error('DB Error:', error);

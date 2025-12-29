@@ -1,4 +1,5 @@
 const { defineConfig } = require("drizzle-kit");
+require('dotenv').config({ override: true });
 
 module.exports = defineConfig({
     schema: "./schema.js",
