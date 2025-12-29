@@ -1,27 +1,23 @@
 const { eq, and, ne } = require('drizzle-orm');
 const { db } = require('../server');
-const { appointments, doctors, users } = require('../schema');
+const { citas, medicos, usuarios } = require('../schema');
 
-// Book Appointment
 exports.createAppointment = async (req, res) => {
     try {
-        const { doctorId, date, startTime, type, notes } = req.body;
-        const patientId = req.user.id; // From Auth Middleware
+        const { medicoId, fecha, horaInicio, tipo, notas } = req.body;
+        const pacienteId = req.user.id;
 
-        // 1. Check if Doctor exists
-        const doctorResult = await db.select().from(doctors).where(eq(doctors.id, doctorId));
+        const doctorResult = await db.select().from(medicos).where(eq(medicos.id, medicoId));
         if (doctorResult.length === 0) {
             return res.status(404).json({ message: 'Médico no encontrado' });
         }
 
-        // 2. Check availability/overlap
-        // Simple check: Is there an active appointment at this time?
-        const existing = await db.select().from(appointments).where(
+        const existing = await db.select().from(citas).where(
             and(
-                eq(appointments.doctorId, doctorId),
-                eq(appointments.date, date),
-                eq(appointments.startTime, startTime),
-                ne(appointments.status, 'CANCELADA')
+                eq(citas.medicoId, medicoId),
+                eq(citas.fecha, fecha),
+                eq(citas.horaInicio, horaInicio),
+                ne(citas.estado, 'CANCELADA')
             )
         );
 
@@ -29,15 +25,14 @@ exports.createAppointment = async (req, res) => {
             return res.status(400).json({ message: 'Horario no disponible' });
         }
 
-        // 3. Create Appointment
-        await db.insert(appointments).values({
-            patientId,
-            doctorId,
-            date,
-            startTime,
-            type: type || 'VIRTUAL',
-            notes,
-            status: 'PENDIENTE'
+        await db.insert(citas).values({
+            pacienteId,
+            medicoId,
+            fecha,
+            horaInicio,
+            tipo: tipo || 'VIRTUAL',
+            notas,
+            estado: 'PENDIENTE'
         });
 
         res.status(201).json({ message: 'Cita reservada exitosamente' });
@@ -47,52 +42,48 @@ exports.createAppointment = async (req, res) => {
     }
 };
 
-// Get My Appointments
 exports.getMyAppointments = async (req, res) => {
     try {
         const userId = req.user.id;
-        const role = req.user.role;
+        const rol = req.user.rol;
 
-        if (role === 'MEDICO') {
-            // Find Doctor ID first
-            const doctorRes = await db.select().from(doctors).where(eq(doctors.userId, userId));
+        if (rol === 'MEDICO') {
+            const doctorRes = await db.select().from(medicos).where(eq(medicos.usuarioId, userId));
             if (doctorRes.length === 0) {
-                return res.json([]); // No profile = no appointments
+                return res.json([]);
             }
-            const doctorId = doctorRes[0].id;
+            const medicoId = doctorRes[0].id;
 
-            // Get appointments for this doctor
             const results = await db.select({
-                id: appointments.id,
-                date: appointments.date,
-                startTime: appointments.startTime,
-                status: appointments.status,
-                type: appointments.type,
-                patientName: users.fullName,
-                meetingLink: appointments.meetingLink
+                id: citas.id,
+                fecha: citas.fecha,
+                horaInicio: citas.horaInicio,
+                estado: citas.estado,
+                tipo: citas.tipo,
+                nombrePaciente: usuarios.nombreCompleto,
+                enlaceReunion: citas.enlaceReunion
             })
-                .from(appointments)
-                .leftJoin(users, eq(appointments.patientId, users.id))
-                .where(eq(appointments.doctorId, doctorId));
+                .from(citas)
+                .leftJoin(usuarios, eq(citas.pacienteId, usuarios.id))
+                .where(eq(citas.medicoId, medicoId));
 
             return res.json(results);
 
         } else {
-            // Patient View
             const results = await db.select({
-                id: appointments.id,
-                date: appointments.date,
-                startTime: appointments.startTime,
-                status: appointments.status,
-                type: appointments.type,
-                doctorName: users.fullName, // Doctor's User Name
-                specialty: doctors.specialty,
-                meetingLink: appointments.meetingLink
+                id: citas.id,
+                fecha: citas.fecha,
+                horaInicio: citas.horaInicio,
+                estado: citas.estado,
+                tipo: citas.tipo,
+                nombreMedico: usuarios.nombreCompleto,
+                especialidad: medicos.especialidad,
+                enlaceReunion: citas.enlaceReunion
             })
-                .from(appointments)
-                .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
-                .leftJoin(users, eq(doctors.userId, users.id))
-                .where(eq(appointments.patientId, userId));
+                .from(citas)
+                .leftJoin(medicos, eq(citas.medicoId, medicos.id))
+                .leftJoin(usuarios, eq(medicos.usuarioId, usuarios.id))
+                .where(eq(citas.pacienteId, userId));
 
             return res.json(results);
         }

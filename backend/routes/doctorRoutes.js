@@ -11,5 +11,6 @@ router.put('/availability', authMiddleware, doctorController.setAvailability);
 
 // Public (for Patients to find doctors)
 router.get('/', doctorController.getAllDoctors);
+router.get('/:id/availability', doctorController.getPublicAvailability);
 
 module.exports = router;

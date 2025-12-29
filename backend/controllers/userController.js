@@ -1,20 +1,20 @@
 const { eq } = require('drizzle-orm');
 const { db } = require('../server');
-const { users } = require('../schema');
+const { usuarios } = require('../schema');
 
 // Get User Profile
 exports.getProfile = async (req, res) => {
     try {
         // req.user.id comes from authMiddleware
-        const userResult = await db.select().from(users).where(eq(users.id, req.user.id));
+        const userResult = await db.select().from(usuarios).where(eq(usuarios.id, req.user.id));
         const user = userResult[0];
 
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        // Exclude passwordHash
-        const { passwordHash, ...userProfile } = user;
+        // Exclude contrasena
+        const { contrasena, ...userProfile } = user;
         res.json(userProfile);
     } catch (error) {
         console.error('Get Profile Error:', error);
@@ -25,22 +25,22 @@ exports.getProfile = async (req, res) => {
 // Update User Profile
 exports.updateProfile = async (req, res) => {
     try {
-        const { fullName, phone, cedula } = req.body;
+        const { nombreCompleto, telefono, cedula } = req.body;
 
         // Update fields
-        await db.update(users)
+        await db.update(usuarios)
             .set({
-                fullName,
-                phone,
+                nombreCompleto,
+                telefono,
                 cedula
             })
-            .where(eq(users.id, req.user.id));
+            .where(eq(usuarios.id, req.user.id));
 
         // Fetch updated user
-        const userResult = await db.select().from(users).where(eq(users.id, req.user.id));
+        const userResult = await db.select().from(usuarios).where(eq(usuarios.id, req.user.id));
         const updatedUser = userResult[0];
 
-        const { passwordHash, ...userProfile } = updatedUser;
+        const { contrasena, ...userProfile } = updatedUser;
         res.json(userProfile);
     } catch (error) {
         console.error('Update Profile Error:', error);

@@ -4,11 +4,11 @@ import { useNavigate, Link } from 'react-router-dom';
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
-        fullName: '',
+        nombreCompleto: '',
         email: '',
         password: '',
-        phone: '',
-        role: 'PACIENTE'
+        telefono: '',
+        rol: 'PACIENTE'
     });
     const [error, setError] = useState('');
     const { register } = useAuth();
@@ -52,11 +52,12 @@ export default function RegisterPage() {
                     )}
 
                     <input
-                        name="fullName"
+                        name="nombreCompleto"
                         type="text"
                         required
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
                         placeholder="Nombre Completo"
+                        value={formData.nombreCompleto}
                         onChange={handleChange}
                     />
 
@@ -66,14 +67,16 @@ export default function RegisterPage() {
                         required
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
                         placeholder="Correo Electrónico"
+                        value={formData.email}
                         onChange={handleChange}
                     />
 
                     <input
-                        name="phone"
+                        name="telefono"
                         type="text"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
                         placeholder="Teléfono"
+                        value={formData.telefono}
                         onChange={handleChange}
                     />
 
@@ -83,16 +86,17 @@ export default function RegisterPage() {
                         required
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
                         placeholder="Contraseña"
+                        value={formData.password}
                         onChange={handleChange}
                     />
 
                     <div>
                         <label className="block text-sm font-medium leading-6 text-gray-900">Soy:</label>
                         <select
-                            name="role"
+                            name="rol"
                             className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             onChange={handleChange}
-                            value={formData.role}
+                            value={formData.rol}
                         >
                             <option value="PACIENTE">Paciente</option>
                             <option value="MEDICO">Médico</option>

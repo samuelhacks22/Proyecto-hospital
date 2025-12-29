@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
+import Layout from './components/Layout';
+
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -17,15 +19,21 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route
-        path="/dashboard"
+        path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Layout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="book-appointment" element={<div>Reservar Cita (Próximamente)</div>} />
+        <Route path="appointments" element={<div>Mis Citas (Próximamente)</div>} />
+        <Route path="profile" element={<div>Perfil (Próximamente)</div>} />
+      </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />
-    </Routes>
+    </Routes >
   );
 }
 
