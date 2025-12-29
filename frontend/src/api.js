@@ -19,4 +19,21 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+
+export const appointmentService = {
+    getAll: () => api.get('/appointments'),
+    create: (data) => api.post('/appointments', data),
+};
+
+export const doctorService = {
+    getAll: () => api.get('/doctors'),
+    getAvailability: (doctorId) => api.get(`/doctors/${doctorId}/availability`),
+};
+
+export const userService = {
+    getProfile: () => api.get('/users/profile'),
+    updateProfile: (data) => api.put('/users/profile', data),
+};
+
 export default api;
+

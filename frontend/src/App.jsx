@@ -4,6 +4,10 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import Layout from './components/Layout';
+import BookAppointment from './pages/BookAppointment';
+import Appointments from './pages/Appointments';
+import Profile from './pages/Profile';
+
 
 
 const ProtectedRoute = ({ children }) => {
@@ -28,9 +32,10 @@ function AppRoutes() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="book-appointment" element={<div>Reservar Cita (Próximamente)</div>} />
-        <Route path="appointments" element={<div>Mis Citas (Próximamente)</div>} />
-        <Route path="profile" element={<div>Perfil (Próximamente)</div>} />
+        <Route path="book-appointment" element={<BookAppointment />} />
+        <Route path="appointments" element={<Appointments />} />
+        <Route path="profile" element={<Profile />} />
+
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes >
