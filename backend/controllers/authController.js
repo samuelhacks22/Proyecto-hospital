@@ -6,12 +6,23 @@ const { usuarios } = require('../schema');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-me';
 
+const validateCedula = (cedula) => {
+    // Simple regex for Dominican Cedula (402-1234567-8 or 001-1234567-8)
+    // allowing with or without dashes
+    const re = /^\d{3}-?\d{7}-?\d{1}$/;
+    return re.test(cedula);
+};
+
 exports.register = async (req, res) => {
     try {
         const { email, password, nombreCompleto, telefono, rol, cedula, nombreClinica, direccionClinica } = req.body;
 
         if (!email || !password || !cedula) {
             return res.status(400).json({ message: 'El correo, contraseña y cédula son obligatorios' });
+        }
+
+        if (!validateCedula(cedula)) {
+            return res.status(400).json({ message: 'Formato de cédula inválido (ej: 402-1234567-8)' });
         }
 
         // Check if user exists (by email OR cedula)
