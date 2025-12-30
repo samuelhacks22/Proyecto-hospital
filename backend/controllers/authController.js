@@ -4,7 +4,11 @@ const { eq, or } = require('drizzle-orm');
 const { db } = require('../server');
 const { usuarios } = require('../schema');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-me';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET is not defined in .env');
+}
 
 const validateCedula = (cedula) => {
     // Simple regex for Dominican Cedula (402-1234567-8 or 001-1234567-8)
