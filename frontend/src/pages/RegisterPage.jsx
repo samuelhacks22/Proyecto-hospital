@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
         nombreCompleto: '',
+        cedula: '',
         email: '',
         password: '',
         telefono: '',
@@ -62,6 +63,16 @@ export default function RegisterPage() {
                     />
 
                     <input
+                        name="cedula"
+                        type="text"
+                        required
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
+                        placeholder="Cédula (Ej: 402-1234567-8)"
+                        value={formData.cedula}
+                        onChange={handleChange}
+                    />
+
+                    <input
                         name="email"
                         type="email"
                         required
@@ -100,8 +111,34 @@ export default function RegisterPage() {
                         >
                             <option value="PACIENTE">Paciente</option>
                             <option value="MEDICO">Médico</option>
+                            <option value="CLINICA">Centro Médico / Clínica</option>
                         </select>
                     </div>
+
+                    {formData.rol === 'CLINICA' && (
+                        <>
+                            <div className="border-t border-gray-200 pt-4">
+                                <h3 className="text-sm font-medium text-gray-900 mb-2">Datos de la Clínica</h3>
+                                <input
+                                    name="nombreClinica"
+                                    type="text"
+                                    required
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3 mb-3"
+                                    placeholder="Nombre de la Institución"
+                                    value={formData.nombreClinica || ''}
+                                    onChange={handleChange}
+                                />
+                                <input
+                                    name="direccionClinica"
+                                    type="text"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
+                                    placeholder="Dirección Física"
+                                    value={formData.direccionClinica || ''}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <div>
                         <button

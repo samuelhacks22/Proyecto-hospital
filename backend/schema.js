@@ -5,7 +5,18 @@ const roleEnum = pgEnum("rol", ["PACIENTE", "MEDICO", "CLINICA", "ADMIN"]);
 const appointmentStatusEnum = pgEnum("estado_cita", ["PENDIENTE", "CONFIRMADA", "CANCELADA", "COMPLETADA"]);
 const appointmentTypeEnum = pgEnum("tipo_cita", ["VIRTUAL", "PRESENCIAL"]);
 
-// Usuarios
+// Clinicas (Tenants)
+const clinicas = pgTable("clinicas", {
+    id: serial("id").primaryKey(),
+    nombre: text("nombre").notNull(),
+    direccion: text("direccion"),
+    telefono: text("telefono"),
+    logoUrl: text("logo_url"),
+    adminUsuarioId: varchar("admin_usuario_id").references(() => usuarios.id),
+    creadoEn: timestamp("creado_en").defaultNow(),
+});
+
+// Usuarios (Updated with clinicaId)
 const usuarios = pgTable("usuarios", {
     id: varchar("id").primaryKey().notNull(), // UUID
     email: text("email").notNull(),
@@ -15,6 +26,7 @@ const usuarios = pgTable("usuarios", {
     cedula: text("cedula"),
     fotoUrl: text("foto_url"),
     rol: roleEnum("rol").default("PACIENTE"),
+    clinicaId: integer("clinica_id").references(() => clinicas.id), // Tenant FK
     creadoEn: timestamp("creado_en").defaultNow(),
 });
 
@@ -27,6 +39,7 @@ const medicos = pgTable("medicos", {
     biografia: text("biografia"),
     precioConsulta: integer("precio_consulta"),
     verificado: boolean("verificado").default(false),
+    clinicaId: integer("clinica_id").references(() => clinicas.id), // Tenant FK
 });
 
 // Disponibilidad
@@ -49,6 +62,7 @@ const citas = pgTable("citas", {
     tipo: appointmentTypeEnum("tipo").default("VIRTUAL").notNull(),
     enlaceReunion: text("enlace_reunion"),
     notas: text("notas"),
+    clinicaId: integer("clinica_id").references(() => clinicas.id), // Tenant FK
     creadoEn: timestamp("creado_en").defaultNow(),
 });
 
@@ -63,6 +77,7 @@ const resultadosLaboratorio = pgTable("resultados_laboratorio", {
     tipo: text("tipo").notNull(), // PDF, IMAGEN, ETC
     descripcion: text("descripcion"),
     subidoEn: timestamp("subido_en").defaultNow(),
+    clinicaId: integer("clinica_id").references(() => clinicas.id), // Tenant FK
 });
 
 module.exports = {
@@ -74,4 +89,5 @@ module.exports = {
     disponibilidad,
     citas,
     resultadosLaboratorio,
+    clinicas,
 };

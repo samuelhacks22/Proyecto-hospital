@@ -31,6 +31,7 @@ exports.uploadResult = async (req, res) => {
             urlArchivo,
             tipo: tipo || 'ARCHIVO',
             descripcion,
+            clinicaId: req.user.clinicaId || null // Save tenant ID
         }).returning();
 
         res.status(201).json(result[0]);

@@ -1,4 +1,4 @@
-const { eq } = require('drizzle-orm');
+const { eq, isNull } = require('drizzle-orm');
 const { db } = require('../server');
 const { medicos, usuarios, disponibilidad } = require('../schema');
 
@@ -105,7 +105,8 @@ exports.getAllDoctors = async (req, res) => {
             biografia: medicos.biografia
         })
             .from(medicos)
-            .leftJoin(usuarios, eq(medicos.usuarioId, usuarios.id));
+            .leftJoin(usuarios, eq(medicos.usuarioId, usuarios.id))
+            .where(req.user.clinicaId ? eq(medicos.clinicaId, req.user.clinicaId) : isNull(medicos.clinicaId));
 
         res.json(allDoctors);
     } catch (error) {

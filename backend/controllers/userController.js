@@ -50,7 +50,14 @@ exports.updateProfile = async (req, res) => {
 // [ADMIN] Get All Users
 exports.getAllUsers = async (req, res) => {
     try {
-        const allUsers = await db.select().from(usuarios);
+        let query = db.select().from(usuarios);
+
+        // If the admin belongs to a clinic, only show users of that clinic
+        if (req.user.clinicaId) {
+            query = query.where(eq(usuarios.clinicaId, req.user.clinicaId));
+        }
+
+        const allUsers = await query;
         // Exclude passwords
         const safeUsers = allUsers.map(u => {
             const { contrasena, ...rest } = u;
