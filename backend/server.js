@@ -5,6 +5,42 @@ const { drizzle } = require('drizzle-orm/node-postgres');
 const { Pool } = require('pg');
 
 const app = express();
+const http = require('http');
+const { Server } = require("socket.io");
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on("connection", (socket) => {
+  socket.emit("me", socket.id);
+
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("callEnded");
+  });
+
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
+    console.log(`User ${socket.id} joined room ${roomId}`);
+  });
+
+  socket.on("call-user", ({ userToCall, signalData, from, name }) => {
+    io.to(userToCall).emit("call-user", { signal: signalData, from, name });
+  });
+
+  socket.on("answer-call", (data) => {
+    io.to(data.to).emit("call-accepted", data.signal);
+  });
+
+  socket.on("ice-candidate", ({ candidate, to }) => {
+    io.to(to).emit("ice-candidate", candidate);
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 
 // Middleware
@@ -51,7 +87,7 @@ app.get('/health', async (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

@@ -19,7 +19,7 @@ const validateCedula = (cedula) => {
 
 exports.register = async (req, res) => {
     try {
-        const { email, password, nombreCompleto, telefono, rol, cedula, nombreClinica, direccionClinica } = req.body;
+        const { email, password, nombreCompleto, telefono, rol, cedula, nombreClinica, direccionClinica, especialidad, numeroLicencia, biografia, precioConsulta } = req.body;
 
         if (!email || !password || !cedula) {
             return res.status(400).json({ message: 'El correo, contraseña y cédula son obligatorios' });
@@ -119,6 +119,12 @@ exports.login = async (req, res) => {
             { expiresIn: '1d' }
         );
 
+        let doctorProfile = null;
+        if (user.rol === 'MEDICO') {
+            const doctorResult = await db.select().from(require('../schema').medicos).where(eq(require('../schema').medicos.usuarioId, user.id));
+            doctorProfile = doctorResult[0];
+        }
+
         res.json({
             token,
             user: {
@@ -127,7 +133,8 @@ exports.login = async (req, res) => {
                 cedula: user.cedula,
                 nombreCompleto: user.nombreCompleto,
                 rol: user.rol,
-                clinicaId: user.clinicaId // Include in response
+                clinicaId: user.clinicaId,
+                verificado: doctorProfile ? doctorProfile.verificado : null
             }
         });
     } catch (error) {

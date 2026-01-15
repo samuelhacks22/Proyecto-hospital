@@ -12,6 +12,8 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import ClinicDashboard from './pages/ClinicDashboard';
 import LandingPage from './pages/LandingPage';
+import VideoCall from './components/VideoCall';
+
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -71,6 +73,13 @@ function AppRoutes() {
 
         <Route path="/profile" element={<Profile />} />
       </Route>
+
+      <Route path="/call/:roomId" element={
+        <ProtectedRoute>
+          <VideoCall />
+        </ProtectedRoute>
+      } />
+
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes >

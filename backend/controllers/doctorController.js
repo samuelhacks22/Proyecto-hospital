@@ -20,11 +20,12 @@ exports.getMyProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        const { especialidad, numeroLicencia, biografia, precioConsulta } = req.body;
+        const { especialidad, numeroLicencia, biografia, precioConsulta, nombreCompleto, telefono } = req.body;
 
         const doctorResult = await db.select().from(medicos).where(eq(medicos.usuarioId, req.user.id));
         const existingProfile = doctorResult[0];
 
+        // Update Doctor specifics
         if (existingProfile) {
             await db.update(medicos)
                 .set({ especialidad, numeroLicencia, biografia, precioConsulta })
@@ -39,8 +40,18 @@ exports.updateProfile = async (req, res) => {
             });
         }
 
+        // Update User basics (Name, Phone)
+        if (nombreCompleto || telefono) {
+            await db.update(usuarios)
+                .set({ nombreCompleto, telefono })
+                .where(eq(usuarios.id, req.user.id));
+        }
+
         const updatedResult = await db.select().from(medicos).where(eq(medicos.usuarioId, req.user.id));
-        res.json(updatedResult[0]);
+        // Get updated user info too
+        const updatedUser = await db.select().from(usuarios).where(eq(usuarios.id, req.user.id));
+
+        res.json({ ...updatedResult[0], ...updatedUser[0] });
     } catch (error) {
         console.error('Update Doctor Profile Error:', error);
         res.status(500).json({ message: 'Error del servidor' });
@@ -106,7 +117,7 @@ exports.getAllDoctors = async (req, res) => {
         })
             .from(medicos)
             .leftJoin(usuarios, eq(medicos.usuarioId, usuarios.id))
-            .where(req.user.clinicaId ? eq(medicos.clinicaId, req.user.clinicaId) : isNull(medicos.clinicaId));
+            .where(req.user?.clinicaId ? eq(medicos.clinicaId, req.user.clinicaId) : isNull(medicos.clinicaId));
 
         res.json(allDoctors);
     } catch (error) {

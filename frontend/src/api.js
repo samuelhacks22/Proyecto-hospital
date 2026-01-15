@@ -27,7 +27,11 @@ export const appointmentService = {
 
 export const doctorService = {
     getAll: () => api.get('/doctors'),
-    getAvailability: (doctorId) => api.get(`/doctors/${doctorId}/availability`),
+    getPublicAvailability: (doctorId) => api.get(`/doctors/${doctorId}/availability`),
+    getProfile: () => api.get('/doctors/me'),
+    updateProfile: (data) => api.put('/doctors/profile', data),
+    getMyAvailability: () => api.get('/doctors/availability'),
+    setAvailability: (data) => api.put('/doctors/availability', data),
 };
 
 export const userService = {
