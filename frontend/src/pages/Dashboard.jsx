@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { appointmentService } from '../api';
 
 export default function Dashboard() {
     const { user } = useAuth();
-    const navigate = useNavigate();
     const [nextAppointment, setNextAppointment] = useState(null);
     const [loading, setLoading] = useState(true);
 

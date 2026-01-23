@@ -60,12 +60,12 @@ export default function BookAppointment() {
                 medicoId: selectedDoctor.id,
                 fecha: selectedDate,
                 horaInicio: selectedTime,
-                notas,
+                notas: notes,
                 tipo: recommendedType || 'VIRTUAL' // Use the recommendation
             });
             alert('¡Cita reservada con éxito!');
             navigate('/dashboard');
-        } catch (error) {
+        } catch {
             alert('Error al reservar cita');
             setBooking(false);
         }

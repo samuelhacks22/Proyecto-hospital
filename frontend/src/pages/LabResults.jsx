@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,17 +13,8 @@ export default function LabResults() {
     const [file, setFile] = useState(null);
     const [description, setDescription] = useState('');
     const [selectedPatientId, setSelectedPatientId] = useState(''); // For doctors
-    const [patients, setPatients] = useState([]); // For doctors to select
 
-    useEffect(() => {
-        fetchResults();
-        if (user.rol === 'MEDICO') {
-            // Fetch patients for dropdown (Mocking or using existing endpoint if available)
-            // For now we might just input ID manually or skip if no endpoint
-        }
-    }, []);
-
-    const fetchResults = async () => {
+    const fetchResults = useCallback(async () => {
         try {
             const res = await api.get('/lab');
             setResults(res.data);
@@ -32,7 +23,15 @@ export default function LabResults() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchResults();
+        if (user.rol === 'MEDICO') {
+            // Fetch patients for dropdown (Mocking or using existing endpoint if available)
+            // For now we might just input ID manually or skip if no endpoint
+        }
+    }, [user.rol, fetchResults]);
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
