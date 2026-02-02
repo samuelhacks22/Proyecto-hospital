@@ -31,22 +31,26 @@ function request(method, path, data, token) {
 async function verify() {
     try {
         console.log('--- 1. Logging In ---');
-        const loginData = JSON.stringify({ email: 'test@example.com', password: 'password123' });
+        const loginData = JSON.stringify({ identifier: 'test@example.com', password: 'password123' });
         const loginRes = await request('POST', '/api/auth/login', loginData);
 
         if (!loginRes.body.token) {
+            console.log('Initial Login Failed:', loginRes.status, loginRes.body);
             // Try registering if login fails (first run cleanup?)
             console.log('Login failed, trying to register...');
-            const regData = JSON.stringify({ email: 'test@example.com', password: 'password123', fullName: 'Test User' });
-            await request('POST', '/api/auth/register', regData);
+            const regData = JSON.stringify({ email: 'test@example.com', password: 'password123', nombreCompleto: 'Test User', cedula: '402-1234567-8' });
+            const regRes = await request('POST', '/api/auth/register', regData);
+            console.log('Registration Result:', regRes.status, regRes.body);
+
             // Login again
             const retryLogin = await request('POST', '/api/auth/login', loginData);
+            console.log('Retry Login Result:', retryLogin.status, retryLogin.body);
             loginRes.body = retryLogin.body;
         }
 
         const token = loginRes.body.token;
         if (!token) {
-            console.error('❌ Could not get token.');
+            console.error('❌ Could not get token. Body:', loginRes.body);
             return;
         }
         console.log('✅ Logged in.');
@@ -59,11 +63,11 @@ async function verify() {
         else console.error('❌ Get Profile Failed', profileRes.status);
 
         console.log('\n--- 3. Update Profile ---');
-        const updateData = JSON.stringify({ fullName: 'Updated Name', phone: '555-0199' });
+        const updateData = JSON.stringify({ nombreCompleto: 'Updated Name', telefono: '555-0199' });
         const updateRes = await request('PUT', '/api/users/profile', updateData, token);
-        console.log('Updated Name:', updateRes.body.fullName);
+        console.log('Updated Name:', updateRes.body.nombreCompleto);
 
-        if (updateRes.body.fullName === 'Updated Name') console.log('✅ Update Profile Success');
+        if (updateRes.body.nombreCompleto === 'Updated Name') console.log('✅ Update Profile Success');
         else console.error('❌ Update Profile Failed');
 
     } catch (err) {
