@@ -22,7 +22,6 @@ const VideoCall = () => {
     const [caller, setCaller] = useState("");
     const [callerSignal, setCallerSignal] = useState(null);
     const [callAccepted, setCallAccepted] = useState(false);
-    const [idToCall, setIdToCall] = useState("");
     const [callEnded, setCallEnded] = useState(false);
     const [name, setName] = useState("");
 
@@ -37,28 +36,7 @@ const VideoCall = () => {
                 myVideo.current.srcObject = stream;
             }
         }).catch(err => console.error("Error accessing media devices:", err));
-
-        socket.on("me", (id) => {
-            setMe(id);
-            // Auto join room from params
-            if (roomId) {
-                socket.emit("join-room", roomId);
-            }
-        });
-
-        socket.on("call-user", (data) => {
-            setReceivingCall(true);
-            setCaller(data.from);
-            setName(data.name);
-            setCallerSignal(data.signal);
-        });
-
-        // Clean up
-        return () => {
-            socket.off("me");
-            socket.off("call-user");
-        }
-    }, [roomId]);
+    }, []);
 
     const callUser = (id) => {
         const peer = new Peer({
@@ -120,6 +98,35 @@ const VideoCall = () => {
         navigate('/appointments'); // Redirect back
     };
 
+    useEffect(() => {
+        socket.on("me", (id) => {
+            setMe(id);
+            // Auto join room from params
+            if (roomId) {
+                socket.emit("join-room", roomId);
+            }
+        });
+
+        socket.on("call-user", (data) => {
+            setReceivingCall(true);
+            setCaller(data.from);
+            setName(data.name);
+            setCallerSignal(data.signal);
+        });
+
+        socket.on("user-connected", (userId) => {
+            console.log("User connected:", userId);
+            callUser(userId);
+        });
+
+        // Clean up
+        return () => {
+            socket.off("me");
+            socket.off("call-user");
+            socket.off("user-connected");
+        }
+    }, [roomId]);
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
             <h1 className="text-3xl font-bold mb-8">Consulta Virtual</h1>
@@ -142,7 +149,7 @@ const VideoCall = () => {
                         </>
                     ) : (
                         <div className="text-center text-gray-400">
-                            <p className="mb-2">Esperando conexión...</p>
+                            <p className="mb-2">Esperando ...</p>
                             {receivingCall && !callAccepted && (
                                 <div className="mt-4">
                                     <p className="text-white font-bold mb-2">{name || "Alguien"} está llamando...</p>
@@ -154,12 +161,10 @@ const VideoCall = () => {
                                     </button>
                                 </div>
                             )}
-                            {/* Manual Call Logic if needed inside Room */}
+                            {/* Status Info */}
                             {!receivingCall && !callAccepted && (
                                 <div className="mt-4 text-xs text-gray-500">
-                                    ID de Sala: {roomId}
-                                    <br />
-                                    Tu ID: {me}
+                                    Conectado a la sala
                                 </div>
                             )}
                         </div>
@@ -193,23 +198,8 @@ const VideoCall = () => {
                 )}
             </div>
 
-            {/* Copy ID for testing if needed */}
-            <div className="mt-4 p-4 border border-gray-700 rounded bg-gray-800">
-                <h3 className="text-sm font-bold mb-2">Debug Info:</h3>
-                <p className="text-xs text-mono text-gray-400">Compartir este ID para recibir llamada: {me}</p>
-                <div className="flex gap-2 mt-2">
-                    <input
-                        type="text"
-                        placeholder="ID a llamar"
-                        value={idToCall}
-                        onChange={(e) => setIdToCall(e.target.value)}
-                        className="bg-gray-700 text-white p-1 text-sm rounded"
-                    />
-                    <button onClick={() => callUser(idToCall)} className="bg-blue-600 text-white text-xs px-2 rounded">
-                        Llamar
-                    </button>
-                </div>
-            </div>
+            {/* Debug Info removed - Auto connection enabled */}
+
         </div>
     );
 };

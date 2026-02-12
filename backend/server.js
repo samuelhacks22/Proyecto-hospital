@@ -26,6 +26,7 @@ io.on("connection", (socket) => {
   socket.on("join-room", (roomId) => {
     socket.join(roomId);
     console.log(`User ${socket.id} joined room ${roomId}`);
+    socket.broadcast.to(roomId).emit("user-connected", socket.id);
   });
 
   socket.on("call-user", ({ userToCall, signalData, from, name }) => {
